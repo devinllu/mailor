@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-IMAP_SERVER = 'imap.shaw.ca'
+# IMAP_SERVER = 'imap.shaw.ca'
+IMAP_SERVER = 'outlook.office365.com'
 EMAIL_FOLDER = "INBOX"
 
 USERNAME = os.getenv('EMAIL_USERNAME')
@@ -20,9 +21,9 @@ def login(server, username, password):
 
     return obj
 
-def record_email(path, message_id, content):
+def record_email(path, message_id, content, title):
     print("Writing message "), message_id
-    f = open('%s/%s.eml' %(path, message_id), 'wb')
+    f = open(f'{path}/{title}.eml', 'wb')
     f.write(content)
     f.close()
 
@@ -32,14 +33,17 @@ def process_mailbox(imap_obj):
     if response != 'OK':
         print("No messages found!")
         return
-
+    
     for message_id in body[0].split():
         response, data = imap_obj.fetch(message_id, '(RFC822)')
         if response != 'OK':
             print("ERROR getting message"), message_id
             return
+        
+        email_msg = email.message_from_bytes(data[0][1], policy=default)
+        subject = str(email_msg['Subject'])
 
-        record_email(OUTPUT_PATH, message_id, data[0][1])
+        record_email(OUTPUT_PATH, message_id, data[0][1], subject)
 
 def main():
     imap_obj = login(IMAP_SERVER, USERNAME, PASSWORD)
