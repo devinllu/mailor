@@ -16,6 +16,7 @@ EMAIL_FOLDER = "INBOX"
 USERNAME = os.getenv('EMAIL_USERNAME')
 PASSWORD = os.getenv('EMAIL_PASSWORD')
 OUTPUT_PATH = os.getenv('LOCAL_DOWNLOAD_PATH')
+ERROR_LOG_PATH = os.getenv('ERROR_LOG_FILE')
 
 def login(server, username, password):
     obj = imaplib.IMAP4_SSL(server)
@@ -28,6 +29,10 @@ def record_email(path, message_id, content, title):
     f = open(f'{path}/{title}.eml', 'wb')
     f.write(content)
     f.close()
+
+def log_error_message(error_msg, date, subject):
+    with open(ERROR_LOG_PATH, 'a') as error_file:
+        error_file.write(f'{date}\n{error_msg}\nCould not download email:{subject}\n\n\n\n\n')
 
 def process_mailbox(imap_obj):
 
@@ -44,14 +49,17 @@ def process_mailbox(imap_obj):
         
         email_msg = email.message_from_bytes(data[0][1], policy=default)
         subject = str(email_msg['Subject'])
+        date = str(email_msg['Date'])
 
         try:
             record_email(OUTPUT_PATH, message_id, data[0][1], subject)
         except FileNotFoundError as fnfe:
             logging.error(f"File not found {fnfe}")
             logging.error(f"Ensure the path is correct: {os.path.abspath(OUTPUT_PATH)}")
+            log_error_message(str(fnfe), date, subject)
         except Exception as e:
             logging.error(f"Error occurred when recording email: {e}")
+            log_error_message(str(e), date, subject)
 
 def main():
     imap_obj = login(IMAP_SERVER, USERNAME, PASSWORD)
