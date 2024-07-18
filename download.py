@@ -1,9 +1,9 @@
-import email
-from email.policy import default
-import logging
-
 import imaplib
 import os
+import logging
+import email
+
+from email.policy import default
 from dotenv import load_dotenv
 
 load_dotenv()
