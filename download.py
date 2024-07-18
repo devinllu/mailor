@@ -1,14 +1,16 @@
 import email
 from email.policy import default
+import logging
 
 import imaplib
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# IMAP_SERVER = 'imap.shaw.ca'
-IMAP_SERVER = 'outlook.office365.com'
+IMAP_SERVER = 'imap.shaw.ca'
+# IMAP_SERVER = 'outlook.office365.com'
 EMAIL_FOLDER = "INBOX"
 
 USERNAME = os.getenv('EMAIL_USERNAME')
@@ -43,7 +45,13 @@ def process_mailbox(imap_obj):
         email_msg = email.message_from_bytes(data[0][1], policy=default)
         subject = str(email_msg['Subject'])
 
-        record_email(OUTPUT_PATH, message_id, data[0][1], subject)
+        try:
+            record_email(OUTPUT_PATH, message_id, data[0][1], subject)
+        except FileNotFoundError as fnfe:
+            logging.error(f"File not found {fnfe}")
+            logging.error(f"Ensure the path is correct: {os.path.abspath(OUTPUT_PATH)}")
+        except Exception as e:
+            logging.error(f"Error occurred when recording email: {e}")
 
 def main():
     imap_obj = login(IMAP_SERVER, USERNAME, PASSWORD)
