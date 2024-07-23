@@ -1,6 +1,7 @@
 # Custom ignores
 files/
 script.py
+logs.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
