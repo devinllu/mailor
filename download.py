@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# available tested servers: imap.shaw.ca, imap.gmail.com
 IMAP_SERVER = 'imap.shaw.ca'
-# IMAP_SERVER = 'outlook.office365.com'
 EMAIL_FOLDER = "INBOX"
 
 USERNAME = os.getenv('EMAIL_USERNAME')
